@@ -28,11 +28,20 @@ library(Lahman)
 dplyr::glimpse(Teams)
 ```
 
-The `Teams` dataset has \_\_\_ observations and \_\_\_ variables.
+The `Teams` dataset has \_\_3015\_ observations and \_\_48\_ variables.
 
 ### Exercise 2
 
-...
+```{r}
+
+mets <- Teams  |> 
+  dplyr::filter(teamID == "NYN")
+my_mets <- mets |> 
+  dplyr::filter(yearID%in%2004:2012)|>
+
+  dplyr::select(yearID,G,W,L)
+my_mets 
+```
 
 ### Exercise 3
 
