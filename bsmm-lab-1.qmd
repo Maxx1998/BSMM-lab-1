@@ -47,14 +47,24 @@ my_mets
 
 ```{r}
 mets_ben <- Teams |>
-  dplyr::select(yearID, teamID, G,RA,RS = R) |>
+  dplyr::select(yearID, teamID, G,RA,RS=R) |>
   dplyr::filter(teamID == "NYN" & yearID%in% 2004:2012)
 mets_ben
 ```
 
 ### Exercise 4
 
-...
+```{r}
+mets_ben <- mets_ben |>
+  dplyr::mutate(WPct = 1/(1+(RA/RS)^2))
+mets_ben
+```
+
+```{r}
+mets_ben <- mets_ben |>
+  dplyr::mutate(W_hat = WPct*G)
+mets_ben
+```
 
 ### Exercise 5
 
