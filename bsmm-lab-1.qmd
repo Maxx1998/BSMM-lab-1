@@ -20,11 +20,17 @@ install.packages('Lahman')
 library(Lahman)
 ```
 
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+
+```
+
 ## Exercises
 
 ### Exercise 1
 
-```{r glimpse-data}
+```{r}
 dplyr::glimpse(Teams)
 ```
 
@@ -33,22 +39,26 @@ The `Teams` dataset has \_\_3015\_ observations and \_\_48\_ variables.
 ### Exercise 2
 
 ```{r}
-
 mets <- Teams  |> 
   dplyr::filter(teamID == "NYN")
 my_mets <- mets |> 
-  dplyr::filter(yearID%in%2004:2012)|>
-
-  dplyr::select(yearID,G,W,L)
-my_mets 
+  dplyr::filter(yearID >=2004 & yearID <=2012)
+my_mets |> 
+  dplyr::select(yearID,W,L,G) 
 ```
 
 ### Exercise 3
 
 ```{r}
 mets_ben <- Teams |>
-  dplyr::select(yearID, teamID, G,RA,RS=R) |>
-  dplyr::filter(teamID == "NYN" & yearID%in% 2004:2012)
+  dplyr::select(yearID, G, teamID,R, RA, W, L) |>
+  dplyr::filter(teamID == "NYN" & yearID %in% 2004:2012)
+mets_ben
+```
+
+```{r}
+mets_ben <- mets_ben |>
+  dplyr::rename(RS= R)    # new name = old name
 mets_ben
 ```
 
@@ -56,31 +66,50 @@ mets_ben
 
 ```{r}
 mets_ben <- mets_ben |>
-  dplyr::mutate(WPct = 1/(1+(RA/RS)^2))
-mets_ben
-```
-
-```{r}
+  dplyr::mutate(WPct = 1 / (1 + (RA / RS) * 2))
 mets_ben <- mets_ben |>
-  dplyr::mutate(W_hat = WPct*G)
+  dplyr::mutate(W_hat =WPct*G)
 mets_ben
 ```
 
 ### Exercise 5
 
-...
+```{r}
+mets_ben <- mets_ben |>
+ dplyr:: mutate(Performance = ifelse(W > W_hat, "Better", "Worse"))
+
+mets_ben
+```
 
 ### Exercise 6
 
-...
+```{r}
+best_seasons <- dplyr::arrange(mets_ben, desc(W))
+
+best_seasons
+```
 
 ### Exercise 7
 
-...
+```{r}
+mets_ben <-mets_ben |> 
+  dplyr::mutate(Diff = W -W_hat) |>
+  dplyr::arrange(desc(Diff))
+mets_ben
+```
 
 ### Exercise 8
 
-...
+```{r}
+mets_ben |>
+  dplyr::summarize(
+    num_years = n(), 
+    total_W = sum(W), 
+    total_L = sum(L), 
+    total_WPct =mean(WPct), 
+    sum_resid = sum(Diff)
+  )
+```
 
 ### Exercise 9
 
@@ -88,4 +117,32 @@ mets_ben
 
 ### Exercise 10
 
-...
+```{r}
+library(dplyr)
+mets_ben <- mets_ben %>%
+  dplyr::mutate(
+    gm = case_when(
+      yearID == 2004 ~ "Jim Duquette",
+      yearID >= 2005 & yearID <= 2010 ~ "Omar Minaya",
+      yearID >= 2011 ~ "Sandy Alderson"
+    )
+  )
+mets_ben
+```
+
+### Exercise 11
+
+```{r}
+manager_summary <- mets_ben |>
+  group_by(gm) |>
+  summarize(
+    num_years = n(),
+    total_W = sum(W),
+    total_L = sum(L),
+    total_WPct = mean(WPct),
+    sum_resid = sum(Diff)
+  )
+
+# Print the manager summary
+manager_summary
+```
